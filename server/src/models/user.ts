@@ -9,11 +9,9 @@ export interface UserDocument extends Document {
   id: string;
   username: string;
   password: string;
-  savedTasks: TaskDocument[];
+  savedTask: TaskDocument[];
   isCorrectPassword(password: string): Promise<boolean>;
   taskCount: number;
-  // savedTasks: TaskDocument[];
-  isCorrectPassword(password: string): Promise<boolean>;
 }
 
 const userSchema = new Schema<UserDocument>(
@@ -27,7 +25,7 @@ const userSchema = new Schema<UserDocument>(
       type: String,
       required: true,
     },
-    savedTasks: [taskSchema],
+    savedTask: [taskSchema],
   },
   // set this to use virtual below
   {
@@ -52,9 +50,9 @@ userSchema.methods.isCorrectPassword = async function (password: string) {
   return await bcrypt.compare(password, this.password);
 };
 
-// when we query a user, we'll also get another field called `bookCount` with the number of saved books we have
-userSchema.virtual("bookCount").get(function () {
-  return this.savedTasks.length;
+
+userSchema.virtual("taskCount").get(function () {
+  return this.savedTask.length;
 });
 // userSchema.virtual("taskCount").get(function () {
 //   return this.savedTasks.length;
