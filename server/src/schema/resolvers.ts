@@ -1,10 +1,6 @@
-import User from "../models/User.js";
+import { User } from "../models/index.js";
 import { signToken, AuthenticationError } from "../services/auth.js";
-import {
-  LoginUserArgs,
-  AddUserArgs,
-  BookDataArgs,
-} from "../interfaces/Login.js";
+import { LoginUserArgs, AddUserArgs } from "../interfaces/Login.js";
 
 const resolvers = {
   Query: {
@@ -51,31 +47,6 @@ const resolvers = {
 
       // Return the token and the user
       return { token, user };
-    },
-    removeBook: async (
-      _parent: any,
-      { bookId }: { bookId: string },
-      context: any
-    ) => {
-      const foundUser = await User.findByIdAndUpdate(
-        { _id: context.user._id },
-        { $pull: { savedBooks: { bookId } } },
-        { new: true }
-      );
-      return foundUser;
-    },
-    saveBook: async (
-      _parent: any,
-      { book }: { book: BookDataArgs },
-      context: any
-    ) => {
-      console.log(context.user);
-      const foundUser = await User.findByIdAndUpdate(
-        { _id: context.user._id },
-        { $push: { savedBooks: { ...book } } },
-        { new: true }
-      );
-      return foundUser;
     },
   },
 };

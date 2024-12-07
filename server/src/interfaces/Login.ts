@@ -8,7 +8,7 @@ export interface AddUserArgs {
   email: string;
   password: string;
 }
-export interface BookDataArgs {
+export interface TaskDataArgs {
   bookId: string;
   title: string;
   authors: string[];
