@@ -1,48 +1,52 @@
 const typeDefs = `
   type User {
-   _id: String
-  username: String
-  password: String
-  createdAt: String
+    _id: String
+    username: String
+    password: String
+    createdAt: String
   }
 
   type Tasks {
-  "_id": String
-  "title": String
-  "description": String
-  "status": String
-  "userId": String
-  "categoryId": String
-  "dueDate": String
+    _id: String
+    title: String
+    description: String
+    status: String
+    userId: String
+    categoryId: String
+    dueDate: String
+    createdAt: String
+    updatedAt: String
   }
 
   type Categories {
-  "_id": "unique_category_id",
-  "name": "Work"
-  }
-
+    _id: String
+    name: String
   }
 
   type Auth {
-  token: ID!
-  user: User!
+    token: ID!
+    user: User!
   }
 
   type Query {
     me: User
   }
 
-  input SaveTaskInput {
+  input TaskInput {
     title: String
-    bookId: String
     description: String
+    dueDate: String
+    status: String
   }
 
   type Mutation {
-    login(username: String!, password:String!): Auth
+    login(username: String!, password: String!): Auth
     addUser(username: String!, password: String!): Auth
-    removeTask(TaskId: String!): User
+    addTask(title: String!, description: String, dueDate: String): Tasks
+    updateTask(taskId: String!, title: String, description: String, dueDate: String): Tasks
+    removeTask(taskId: String!): Boolean
   }
 `;
 
 export default typeDefs;
+
