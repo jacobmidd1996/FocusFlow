@@ -12,6 +12,8 @@ export interface UserDocument extends Document {
   savedTasks: TaskDocument[];
   isCorrectPassword(password: string): Promise<boolean>;
   taskCount: number;
+  // savedTasks: TaskDocument[];
+  isCorrectPassword(password: string): Promise<boolean>;
 }
 
 const userSchema = new Schema<UserDocument>(
@@ -26,6 +28,8 @@ const userSchema = new Schema<UserDocument>(
       required: true,
     },
     savedTasks: [taskSchema],
+=======
+    // set savedBooks to be an array of data that adheres to the bookSchema
   },
   // set this to use virtual below
   {
@@ -54,6 +58,9 @@ userSchema.methods.isCorrectPassword = async function (password: string) {
 userSchema.virtual("bookCount").get(function () {
   return this.savedTasks.length;
 });
+// userSchema.virtual("taskCount").get(function () {
+//   return this.savedTasks.length;
+// });
 
 const User = model<UserDocument>("User", userSchema);
 

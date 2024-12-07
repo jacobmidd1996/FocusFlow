@@ -21,6 +21,8 @@ const typeDefs = `
   "name": "Work"
   }
 
+  }
+
   type Auth {
   token: ID!
   user: User!
