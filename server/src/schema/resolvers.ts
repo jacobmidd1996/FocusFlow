@@ -3,7 +3,7 @@ import { signToken, AuthenticationError } from "../services/auth.js";
 import {
   LoginUserArgs,
   AddUserArgs,
-  BookDataArgs,
+  TaskDataArgs,
 } from "../interfaces/Login.js";
 
 const resolvers = {
@@ -19,9 +19,9 @@ const resolvers = {
     },
   },
   Mutation: {
-    login: async (_parent: any, { email, password }: LoginUserArgs) => {
-      // Find a user with the provided email
-      const user = await User.findOne({ email });
+    login: async (_parent: any, { username, password }: LoginUserArgs) => {
+      // Find a user with the username
+      const user = await User.findOne({ username });
 
       // If no user is found, throw an AuthenticationError
       if (!user) {
@@ -37,42 +37,42 @@ const resolvers = {
       }
 
       // Sign a token with the user's information
-      const token = signToken(user.username, user.email, user._id);
+      const token = signToken(user.username, user._id);
 
       // Return the token and the user
       return { token, user };
     },
     addUser: async (_parent: any, args: AddUserArgs) => {
-      // Create a new user with the provided username, email, and password
+      // Create a new user with the provided username and password
       const user = await User.create({ ...args });
 
       // Sign a token with the user's information
-      const token = signToken(user.username, user.email, user._id);
+      const token = signToken(user.username, user._id);
 
       // Return the token and the user
       return { token, user };
     },
-    removeBook: async (
+    removeTask: async (
       _parent: any,
-      { bookId }: { bookId: string },
+      { taskId }: { taskId: string },
       context: any
     ) => {
       const foundUser = await User.findByIdAndUpdate(
         { _id: context.user._id },
-        { $pull: { savedBooks: { bookId } } },
+        { $pull: { savedBooks: { taskId } } },
         { new: true }
       );
       return foundUser;
     },
-    saveBook: async (
+    savedTask: async (
       _parent: any,
-      { book }: { book: BookDataArgs },
+      { task }: { task: TaskDataArgs },
       context: any
     ) => {
       console.log(context.user);
       const foundUser = await User.findByIdAndUpdate(
         { _id: context.user._id },
-        { $push: { savedBooks: { ...book } } },
+        { $push: { savedTask: { ...task } } },
         { new: true }
       );
       return foundUser;

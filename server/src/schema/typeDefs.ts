@@ -2,22 +2,25 @@ const typeDefs = `
   type User {
    _id: String
   username: String
-  email: String
   password: String
-  savedBooks: [Book]
-  bookCount: Int
+  createdAt: String
   }
 
-  type Book {
-  _id: ID
-  title: String
-  authors: [String]
-  bookId: String
-  description: String
-  forSale: String
-  image: String
-  link: String
+  type Tasks {
+  "_id": String
+  "title": String
+  "description": String
+  "status": String
+  "userId": String
+  "categoryId": String
+  "dueDate": String
   }
+
+  type Categories {
+  "_id": "unique_category_id",
+  "name": "Work"
+  }
+
   type Auth {
   token: ID!
   user: User!
@@ -27,22 +30,16 @@ const typeDefs = `
     me: User
   }
 
-
-  input SavedBookInput {
+  input SaveTaskInput {
     title: String
-    authors: [String]
     bookId: String
     description: String
-    forSale: String
-    image: String
-    link: String
   }
 
   type Mutation {
     login(email: String!, password:String!): Auth
     addUser(username: String!, email: String!, password: String!): Auth
-    saveBook(book: SavedBookInput ): User
-    removeBook(bookId: String!): User
+    removeTask(TaskId: String!): User
   }
 `;
 
