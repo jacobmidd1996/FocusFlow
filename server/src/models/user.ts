@@ -2,12 +2,16 @@ import { Schema, model, type Document } from "mongoose";
 import bcrypt from "bcrypt";
 
 // import schema from Book.js
+import taskSchema from "./Book.js";
+import type { taskDocument } from "./Book.js";
 
 export interface UserDocument extends Document {
   id: string;
   username: string;
-  email: string;
   password: string;
+  savedTasks: TaskDocument[];
+  isCorrectPassword(password: string): Promise<boolean>;
+  taskCount: number;
   // savedTasks: TaskDocument[];
   isCorrectPassword(password: string): Promise<boolean>;
 }
@@ -19,16 +23,12 @@ const userSchema = new Schema<UserDocument>(
       required: true,
       unique: true,
     },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      match: [/.+@.+\..+/, "Must use a valid email address"],
-    },
     password: {
       type: String,
       required: true,
     },
+    savedTasks: [taskSchema],
+=======
     // set savedBooks to be an array of data that adheres to the bookSchema
   },
   // set this to use virtual below
@@ -55,6 +55,9 @@ userSchema.methods.isCorrectPassword = async function (password: string) {
 };
 
 // when we query a user, we'll also get another field called `bookCount` with the number of saved books we have
+userSchema.virtual("bookCount").get(function () {
+  return this.savedTasks.length;
+});
 // userSchema.virtual("taskCount").get(function () {
 //   return this.savedTasks.length;
 // });
