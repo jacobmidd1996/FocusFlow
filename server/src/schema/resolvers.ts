@@ -5,7 +5,6 @@ import {
   AddUserArgs,
   TaskDataArgs,
 } from "../interfaces/Login.js";
-import { LoginUserArgs, AddUserArgs } from "../interfaces/Login.js";
 
 const resolvers = {
   Query: {
