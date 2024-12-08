@@ -10,7 +10,6 @@ import type { User } from "../models/user.js";
 const LoginForm = ({}: { handleModalClose: () => void }) => {
   const [userFormData, setUserFormData] = useState<User>({
     username: "",
-    email: "",
     password: "",
     savedTasks: [],
   });
@@ -36,7 +35,6 @@ const LoginForm = ({}: { handleModalClose: () => void }) => {
     try {
       const { data } = await login({
         variables: {
-          email: userFormData.email,
           password: userFormData.password,
         },
       });
@@ -54,7 +52,6 @@ const LoginForm = ({}: { handleModalClose: () => void }) => {
 
     setUserFormData({
       username: "",
-      email: "",
       password: "",
       savedTasks: [],
     });
@@ -74,17 +71,17 @@ const LoginForm = ({}: { handleModalClose: () => void }) => {
             : "Something went wrong with your login credentials!"}
         </Alert>
         <Form.Group className="mb-3">
-          <Form.Label htmlFor="email">Email</Form.Label>
+          <Form.Label htmlFor="username">username</Form.Label>
           <Form.Control
             type="text"
-            placeholder="Your email"
-            name="email"
+            placeholder="Your username"
+            name="username"
             onChange={handleInputChange}
-            value={userFormData.email || ""}
+            value={userFormData.username || ""}
             required
           />
           <Form.Control.Feedback type="invalid">
-            Email is required!
+            username is required!
           </Form.Control.Feedback>
         </Form.Group>
 
@@ -103,7 +100,7 @@ const LoginForm = ({}: { handleModalClose: () => void }) => {
           </Form.Control.Feedback>
         </Form.Group>
         <Button
-          disabled={!(userFormData.email && userFormData.password)}
+          disabled={!(userFormData.username && userFormData.password)}
           type="submit"
           variant="success"
         >
