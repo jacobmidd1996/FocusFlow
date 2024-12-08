@@ -5,14 +5,14 @@ import { useMutation } from "@apollo/client";
 
 import { LOGIN_USER } from "../utils/mutations";
 import Auth from "../utils/auth";
-import type { User } from "../models/User";
+import type { User } from "../models/user.js";
 
 const LoginForm = ({}: { handleModalClose: () => void }) => {
   const [userFormData, setUserFormData] = useState<User>({
     username: "",
     email: "",
     password: "",
-    savedBooks: [],
+    savedTasks: [],
   });
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
@@ -56,7 +56,7 @@ const LoginForm = ({}: { handleModalClose: () => void }) => {
       username: "",
       email: "",
       password: "",
-      savedBooks: [],
+      savedTasks: [],
     });
   };
 
