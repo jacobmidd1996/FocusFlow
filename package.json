@@ -14,7 +14,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/cors": "^2.8.17",
     "@types/node": "^22.10.1",
     "concurrently": "^8.2.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5"
   }
 }
