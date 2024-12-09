@@ -1,14 +1,38 @@
-import React, { useState } from "react";
-import { useMutation, gql } from "@apollo/client";
 
-const SIGNUP_MUTATION = gql`
-  mutation AddUser($username: String!, $password: String!) {
-    addUser(username: $username, password: $password) {
-      token
-      user {
-        _id
-        username
-      }
+import { useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
+import { Form, Button, Alert } from "react-bootstrap";
+import { useMutation } from "@apollo/client";
+import { ADD_USER } from "../utils/mutations";
+import Auth from "../utils/auth";
+import type { User } from "../models/user.ts";
+// golly ge i hope this push works
+
+const SignupForm = ({}: { handleModalClose: () => void }) => {
+  const [userFormData, setUserFormData] = useState<User>({
+    username: "",
+    password: "",
+    savedTasks: [],
+  });
+
+  const [validated] = useState(false);
+
+  const [showAlert, setShowAlert] = useState(false);
+
+  const [addUser] = useMutation(ADD_USER);
+
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setUserFormData({ ...userFormData, [name]: value });
+  };
+
+  const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const form = event.currentTarget;
+    if (form.checkValidity() === false) {
+      event.preventDefault();
+      event.stopPropagation();
     }
   }
 `;
