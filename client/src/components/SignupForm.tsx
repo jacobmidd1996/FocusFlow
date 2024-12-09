@@ -8,39 +8,39 @@ import Auth from "../utils/auth";
 import type { User } from "../models/user.ts";
 // golly ge i hope this push works
 
-const SignupForm = ({}: { handleModalClose: () => void }) => {
-  const [userFormData, setUserFormData] = useState<User>({
-    username: "",
-    password: "",
-    savedTasks: [],
-  });
+// const SignupForm = ({}: { handleModalClose: () => void }) => {
+//   const [userFormData, setUserFormData] = useState<User>({
+//     username: "",
+//     password: "",
+//     savedTasks: [],
+//   });
 
-  const [validated] = useState(false);
+//   const [validated] = useState(false);
 
-  const [showAlert, setShowAlert] = useState(false);
+//   const [showAlert, setShowAlert] = useState(false);
 
-  const [addUser] = useMutation(ADD_USER);
+//   const [addUser] = useMutation(ADD_USER);
 
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    setUserFormData({ ...userFormData, [name]: value });
-  };
+//   const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+//     const { name, value } = event.target;
+//     setUserFormData({ ...userFormData, [name]: value });
+//   };
 
-  const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+//   const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
+//     event.preventDefault();
 
-    const form = event.currentTarget;
-    if (form.checkValidity() === false) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-  }
-`;
+//     const form = event.currentTarget;
+//     if (form.checkValidity() === false) {
+//       event.preventDefault();
+//       event.stopPropagation();
+//     }
+//   }
+// ;
 
 const SignupForm: React.FC = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [addUser, { loading, error }] = useMutation(SIGNUP_MUTATION);
+  const [addUser, { loading, error }] = useMutation(ADD_USER);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

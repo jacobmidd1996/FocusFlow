@@ -27,6 +27,7 @@ export const ADD_USER = gql`
       token
       user {
         username
+        _id
       }
     }
   }

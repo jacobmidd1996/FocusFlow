@@ -9,6 +9,8 @@ import {
 const resolvers = {
   Query: {
     me: async (_parent: any, _args: any, context: any) => {
+      console.log(context.user)
+      console.log(context.params)
       const foundUser = await User.findOne({
         $or: [
           { _id: context.user ? context.user._id : context.params.id },
@@ -32,6 +34,7 @@ const resolvers = {
       return { token, user };
     },
     addUser: async (_parent: any, args: AddUserArgs) => {
+      console.log(args)
       const user = await User.create({ ...args });
       const token = signToken(user.username, user._id);
       return { token, user };
