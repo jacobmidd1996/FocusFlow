@@ -5,8 +5,8 @@ import { expressMiddleware } from "@apollo/server/express4";
 import cors from "cors";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
-import typeDefs from "./schema/typeDefs";
-import resolvers from "./schema/resolvers";
+import { typeDefs, resolvers } from "./schema/index.js";
+import { authenticateToken } from "./services/auth.js";
 
 dotenv.config(); // Load environment variables
 
@@ -28,19 +28,24 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "defaultsecret");
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "defaultsecret"
+    );
     (req as any).user = decoded; // Attach decoded user data to the request
     next();
   } catch (err) {
     console.error("Invalid token:", err);
     return res.status(401).json({ message: "Invalid token" });
   }
+  return;
 };
 
 app.use(authMiddleware); // Apply the authentication middleware
 
 // MongoDB Connection
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/focusflow";
+const MONGODB_URI =
+  process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/focusflow";
 
 mongoose
   .connect(MONGODB_URI, {
@@ -68,5 +73,3 @@ const server = new ApolloServer({
     console.log("Use GraphQL at http://localhost:3001/graphql");
   });
 })();
-
-

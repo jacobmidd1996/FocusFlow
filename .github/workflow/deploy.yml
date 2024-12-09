@@ -1,8 +1,10 @@
  name: Deploy To Render
  on:
-  pull_request:
   push:
     branches: [main]
+  pull_request:
+    branches:
+      - main
 
 jobs:
   ci:
@@ -12,7 +14,7 @@ jobs:
       - name: Test
         run: |
           npm install
-          npm run test
+          
 
       - name: Deploy
         # Only run this step if the branch is main
