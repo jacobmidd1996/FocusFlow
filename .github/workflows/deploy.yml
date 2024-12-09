@@ -1,5 +1,5 @@
- name: Deploy To Render
- on:
+name: Deploy To Render
+on:
   push:
     branches: [main]
   pull_request:
@@ -8,6 +8,7 @@
 
 jobs:
   ci:
+    name: Deploy To Render
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
