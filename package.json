@@ -5,6 +5,7 @@
   "main": "server/server.js",
   "scripts": {
     "start": "cd server && npm run start",
+    "dev": "vite",
     "develop": "concurrently \"cd server && npm run watch\" \"cd client && npm run dev\"",
     "install": "cd server && npm i && cd ../client && npm i",
     "build": "concurrently \"cd server && npm run build\" \"cd client && npm run build\"",
@@ -19,6 +20,7 @@
     "concurrently": "^8.2.0"
   },
   "dependencies": {
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "vite": "^6.0.3"
   }
 }
