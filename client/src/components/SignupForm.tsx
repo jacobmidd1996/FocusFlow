@@ -1,125 +1,93 @@
-import { useState } from "react";
-import type { ChangeEvent, FormEvent } from "react";
-import { Form, Button, Alert } from "react-bootstrap";
-import { useMutation } from "@apollo/client";
-import { ADD_USER } from "../utils/mutations";
-import Auth from "../utils/auth";
-import type { User } from "../models/user.ts";
+import React, { useState } from "react";
+import { useMutation, gql } from "@apollo/client";
 
-const SignupForm = ({}: { handleModalClose: () => void }) => {
-  const [userFormData, setUserFormData] = useState<User>({
-    username: "",
-    password: "",
-    savedTasks: [],
-  });
-
-  const [validated] = useState(false);
-
-  const [showAlert, setShowAlert] = useState(false);
-
-  const [addUser] = useMutation(ADD_USER);
-
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    setUserFormData({ ...userFormData, [name]: value });
-  };
-
-  const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const form = event.currentTarget;
-    if (form.checkValidity() === false) {
-      event.preventDefault();
-      event.stopPropagation();
+// GraphQL Mutation for Signup
+const SIGNUP_MUTATION = gql`
+  mutation AddUser($username: String!, $password: String!) {
+    addUser(username: $username, password: $password) {
+      token
+      user {
+        _id
+        username
+      }
     }
+  }
+`;
 
+const SignupForm: React.FC = () => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [addUser, { loading, error }] = useMutation(SIGNUP_MUTATION);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
       const { data } = await addUser({
-        variables: { ...userFormData },
+        variables: { username, password },
       });
 
-      const { token } = data.addUser;
-      Auth.login(token);
-    } catch (err) {
-      console.error(err);
-      setShowAlert(true);
-    }
+      console.log("Signup successful:", data);
 
-    setUserFormData({
-      username: "",
-      password: "",
-      savedTasks: [],
-    });
+      // Save the token in localStorage
+      localStorage.setItem("token", data.addUser.token);
+
+      // Optional: Redirect the user or display a success message
+      alert("Signup successful! You are now logged in.");
+      window.location.reload(); // Refresh to re-render the App
+    } catch (err) {
+      console.error("Signup error:", err);
+    }
   };
 
   return (
-    <>
-      {/* This is needed for the validation functionality above */}
-      <Form noValidate validated={validated} onSubmit={handleFormSubmit}>
-        {/* show alert if server response is bad */}
-        <Alert
-          dismissible
-          onClose={() => setShowAlert(false)}
-          show={showAlert}
-          variant="danger"
-        >
-          Something went wrong with your signup!
-        </Alert>
-
-        <Form.Group className="mb-3">
-          <Form.Label htmlFor="username">Username</Form.Label>
-          <Form.Control
+    <div style={{ maxWidth: "400px", margin: "0 auto", textAlign: "center" }}>
+      <h2>Sign Up</h2>
+      <form onSubmit={handleSubmit}>
+        <div style={{ marginBottom: "10px" }}>
+          <label htmlFor="username">Username</label>
+          <input
             type="text"
-            placeholder="Your username"
-            name="username"
-            onChange={handleInputChange}
-            value={userFormData.username || ""}
+            id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
+            style={{ display: "block", width: "100%", padding: "8px" }}
           />
-          <Form.Control.Feedback type="invalid">
-            Username is required!
-          </Form.Control.Feedback>
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label htmlFor="username">username</Form.Label>
-          <Form.Control
-            type="username"
-            placeholder="Your username address"
-            name="username"
-            onChange={handleInputChange}
-            value={userFormData.username || ""}
-            required
-          />
-          <Form.Control.Feedback type="invalid">
-            username is required!
-          </Form.Control.Feedback>
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label htmlFor="password">Password</Form.Label>
-          <Form.Control
+        </div>
+        <div style={{ marginBottom: "10px" }}>
+          <label htmlFor="password">Password</label>
+          <input
             type="password"
-            placeholder="Your password"
-            name="password"
-            onChange={handleInputChange}
-            value={userFormData.password || ""}
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
+            style={{ display: "block", width: "100%", padding: "8px" }}
           />
-          <Form.Control.Feedback type="invalid">
-            Password is required!
-          </Form.Control.Feedback>
-        </Form.Group>
-        <Button
-          disabled={!(userFormData.username && userFormData.password)}
+        </div>
+        <button
           type="submit"
-          variant="success"
+          disabled={loading}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#28a745",
+            color: "#fff",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
         >
-          Submit
-        </Button>
-      </Form>
-    </>
+          {loading ? "Signing up..." : "Sign Up"}
+        </button>
+        {error && (
+          <p style={{ color: "red", marginTop: "10px" }}>
+            Signup failed. Please try again.
+          </p>
+        )}
+      </form>
+    </div>
   );
 };
 
 export default SignupForm;
+

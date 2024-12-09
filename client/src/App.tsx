@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQuery, gql } from "@apollo/client";
 import LoginForm from "./components/LoginForm";
+import SignupForm from "./components/SignupForm";
 
 // GraphQL Query to fetch the authenticated user's data
 const ME_QUERY = gql`
@@ -19,11 +20,10 @@ const ME_QUERY = gql`
 `;
 
 const App: React.FC = () => {
-  // Check if the user is authenticated by verifying the token in localStorage
   const token = localStorage.getItem("token");
+  const [isSigningUp, setIsSigningUp] = useState(false);
 
   const handleLogout = () => {
-    // Clear the token and refresh the page
     localStorage.removeItem("token");
     window.location.reload();
   };
@@ -32,12 +32,29 @@ const App: React.FC = () => {
     return (
       <div>
         <h1>Welcome to FocusFlow</h1>
-        <LoginForm />
+        {isSigningUp ? (
+          <SignupForm />
+        ) : (
+          <LoginForm />
+        )}
+        <button
+          onClick={() => setIsSigningUp(!isSigningUp)}
+          style={{
+            marginTop: "10px",
+            padding: "10px 20px",
+            backgroundColor: "#007BFF",
+            color: "#fff",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+        >
+          {isSigningUp ? "Go to Login" : "Go to Signup"}
+        </button>
       </div>
     );
   }
 
-  // Fetch user data using the token
   const { loading, error, data } = useQuery(ME_QUERY, {
     context: {
       headers: {
@@ -77,17 +94,9 @@ const App: React.FC = () => {
       </button>
       <h2>Your Tasks</h2>
       {tasks.length > 0 ? (
-        <ul style={{ listStyleType: "none", padding: 0 }}>
+        <ul>
           {tasks.map((task: any) => (
-            <li
-              key={task._id}
-              style={{
-                marginBottom: "10px",
-                padding: "10px",
-                border: "1px solid #ddd",
-                borderRadius: "5px",
-              }}
-            >
+            <li key={task._id}>
               <strong>{task.title}</strong>
               <p>{task.description}</p>
               <small>Due: {new Date(task.dueDate).toLocaleDateString()}</small>
@@ -102,6 +111,7 @@ const App: React.FC = () => {
 };
 
 export default App;
+
 
 
 
