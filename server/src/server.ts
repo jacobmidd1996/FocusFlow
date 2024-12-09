@@ -2,29 +2,25 @@ import express, { Request, Response, NextFunction } from "express";
 import mongoose, { ConnectOptions } from "mongoose";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
-import cors from "cors";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import { typeDefs, resolvers } from "./schema/index.js";
-import { authenticateToken } from "./services/auth.js";
 
 dotenv.config(); // Load environment variables
 
 const app = express();
+const PORT = process.env.PORT || 3001;
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 // Enable CORS for cross-origin requests
-app.use(
-  cors({
-    origin: "http://localhost:3000", // Allow your front-end app to access the API
-  })
-);
 
 // Middleware for token authentication
 const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers.authorization?.split(" ")[1]; // Extract token from header
   if (!token) {
-    console.error("No token provided");
-    return res.status(401).json({ message: "Authorization token missing" });
+    // console.error("No token provided");
+    return next(); // res.status(401).json({ message: "Authorization token missing" });
   }
 
   try {
@@ -33,12 +29,11 @@ const authMiddleware = (req: Request, res: Response, next: NextFunction) => {
       process.env.JWT_SECRET || "defaultsecret"
     );
     (req as any).user = decoded; // Attach decoded user data to the request
-    next();
+    return next();
   } catch (err) {
     console.error("Invalid token:", err);
     return res.status(401).json({ message: "Invalid token" });
   }
-  return;
 };
 
 app.use(authMiddleware); // Apply the authentication middleware
@@ -49,7 +44,7 @@ const MONGODB_URI =
 
 mongoose
   .connect(MONGODB_URI, {
-    dbName: "focusflow", // Optional: Specify the database name
+    dbName: "FocusFlow", // Optional: Specify the database name
     useUnifiedTopology: true, // Modern MongoDB drivers use this by default
   } as ConnectOptions) // Explicitly cast the options to ConnectOptions
   .then(() => console.log("Connected to MongoDB"))
@@ -68,7 +63,7 @@ const server = new ApolloServer({
   await server.start();
   app.use("/graphql", expressMiddleware(server));
 
-  app.listen(3001, () => {
+  app.listen(PORT, () => {
     console.log("API server running on port 3001!");
     console.log("Use GraphQL at http://localhost:3001/graphql");
   });
