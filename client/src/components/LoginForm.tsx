@@ -1,114 +1,93 @@
-import { useState } from "react";
-import type { ChangeEvent, FormEvent } from "react";
-import { Form, Button, Alert } from "react-bootstrap";
-import { useMutation } from "@apollo/client";
+import React, { useState } from "react";
+import { useMutation, gql } from "@apollo/client";
 
-import { LOGIN_USER } from "../utils/mutations";
-import Auth from "../utils/auth";
-import type { User } from "../models/user.js";
-
-const LoginForm = ({}: { handleModalClose: () => void }) => {
-  const [userFormData, setUserFormData] = useState<User>({
-    username: "",
-    password: "",
-    savedTasks: [],
-  });
-  const [validated] = useState(false);
-  const [showAlert, setShowAlert] = useState(false);
-
-  const [login, { error }] = useMutation(LOGIN_USER);
-
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    setUserFormData({ ...userFormData, [name]: value });
-  };
-
-  const handleFormSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const form = event.currentTarget;
-    if (form.checkValidity() === false) {
-      event.preventDefault();
-      event.stopPropagation();
+// GraphQL Mutation for Login
+const LOGIN_MUTATION = gql`
+  mutation Login($username: String!, $password: String!) {
+    login(username: $username, password: $password) {
+      token
+      user {
+        _id
+        username
+      }
     }
+  }
+`;
 
+const LoginForm: React.FC = () => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [login, { loading, error }] = useMutation(LOGIN_MUTATION);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
       const { data } = await login({
-        variables: {
-          password: userFormData.password,
-        },
+        variables: { username, password },
       });
 
-      const token = data?.login.token;
-      if (!token) {
-        throw new Error("Something went wrong!");
-      }
+      console.log("Login successful:", data);
 
-      Auth.login(token);
+      // Save the token in localStorage
+      localStorage.setItem("token", data.login.token);
+
+      // Optional: Redirect the user or display a success message
+      alert("Login successful!");
     } catch (err) {
-      console.error(err);
-      setShowAlert(true);
+      console.error("Login error:", err);
     }
-
-    setUserFormData({
-      username: "",
-      password: "",
-      savedTasks: [],
-    });
   };
 
   return (
-    <>
-      <Form noValidate validated={validated} onSubmit={handleFormSubmit}>
-        <Alert
-          dismissible
-          onClose={() => setShowAlert(false)}
-          show={showAlert || !!error}
-          variant="danger"
-        >
-          {error
-            ? "Invalid login credentials!"
-            : "Something went wrong with your login credentials!"}
-        </Alert>
-        <Form.Group className="mb-3">
-          <Form.Label htmlFor="username">username</Form.Label>
-          <Form.Control
+    <div style={{ maxWidth: "400px", margin: "0 auto", textAlign: "center" }}>
+      <h2>Login</h2>
+      <form onSubmit={handleSubmit}>
+        <div style={{ marginBottom: "10px" }}>
+          <label htmlFor="username">Username</label>
+          <input
             type="text"
-            placeholder="Your username"
-            name="username"
-            onChange={handleInputChange}
-            value={userFormData.username || ""}
+            id="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
+            style={{ display: "block", width: "100%", padding: "8px" }}
           />
-          <Form.Control.Feedback type="invalid">
-            username is required!
-          </Form.Control.Feedback>
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label htmlFor="password">Password</Form.Label>
-          <Form.Control
+        </div>
+        <div style={{ marginBottom: "10px" }}>
+          <label htmlFor="password">Password</label>
+          <input
             type="password"
-            placeholder="Your password"
-            name="password"
-            onChange={handleInputChange}
-            value={userFormData.password || ""}
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
+            style={{ display: "block", width: "100%", padding: "8px" }}
           />
-          <Form.Control.Feedback type="invalid">
-            Password is required!
-          </Form.Control.Feedback>
-        </Form.Group>
-        <Button
-          disabled={!(userFormData.username && userFormData.password)}
+        </div>
+        <button
           type="submit"
-          variant="success"
+          disabled={loading}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#007BFF",
+            color: "#fff",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
         >
-          Submit
-        </Button>
-      </Form>
-    </>
+          {loading ? "Logging in..." : "Login"}
+        </button>
+        {error && (
+          <p style={{ color: "red", marginTop: "10px" }}>
+            Login failed. Please check your credentials and try again.
+          </p>
+        )}
+      </form>
+    </div>
   );
 };
 
 export default LoginForm;
+
+
