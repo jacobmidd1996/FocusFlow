@@ -1,85 +1,111 @@
-import React from "react";
-import { useQuery, gql, useMutation } from "@apollo/client";
-
-// GraphQL Query to fetch tasks
-const ME_QUERY = gql`
-  query GetMe {
-    me {
-      _id
-      username
-      savedTask {
-        _id
-        title
-        description
-        dueDate
-      }
-    }
-  }
-`;
-
-// GraphQL Mutation to delete a task
-const DELETE_TASK_MUTATION = gql`
-  mutation RemoveTask($taskId: String!) {
-    removeTask(taskId: $taskId) {
-      _id
-      username
-      savedTask {
-        _id
-      }
-    }
-  }
-`;
+import React, { useState } from "react";
+import { useMutation } from "@apollo/client";
+import { ADD_TASK } from "../utils/mutations";
 
 const TaskDashboard: React.FC = () => {
-  const { loading, error, data, refetch } = useQuery(ME_QUERY, {
-    context: {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    },
-  });
+  // State to manage new task inputs
+  const [taskTitle, setTaskTitle] = useState("");
+  const [taskDescription, setTaskDescription] = useState("");
+  const [taskDueDate, setTaskDueDate] = useState("");
+  const [taskStatus, setTaskStatus] = useState("Pending");
 
-  const [deleteTask] = useMutation(DELETE_TASK_MUTATION, {
-    onCompleted: () => {
-      refetch(); // Refresh the task list after deletion
-    },
-  });
+  // Apollo Client mutation hook
+  const [addTask, { loading, error }] = useMutation(ADD_TASK);
 
-  if (loading) return <p>Loading tasks...</p>;
-  if (error) return <p>Error loading tasks: {error.message}</p>;
-
-  const handleDelete = async (taskId: string) => {
+  // Handle form submission to add a new task
+  const handleAddTask = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      await deleteTask({ variables: { taskId } });
+      const { data } = await addTask({
+        variables: {
+          title: taskTitle,
+          description: taskDescription,
+          dueDate: taskDueDate,
+          status: taskStatus,
+        },
+      });
+      console.log("Task added:", data);
+
+      // Clear the form inputs after successful task addition
+      setTaskTitle("");
+      setTaskDescription("");
+      setTaskDueDate("");
+      setTaskStatus("Pending");
     } catch (err) {
-      console.error("Error deleting task:", err);
+      console.error("Error adding task:", err);
     }
   };
 
-  const tasks = data?.me?.savedTask || [];
-
   return (
-    <div className="container">
-      <h2>Your Tasks</h2>
-      {tasks.length > 0 ? (
-        <ul className="task-list">
-          {tasks.map((task: any) => (
-            <li key={task._id} className="task-item">
-              <strong>{task.title}</strong>
-              <p>{task.description}</p>
-              <small>Due: {new Date(task.dueDate).toLocaleDateString()}</small>
-              <button onClick={() => handleDelete(task._id)} className="button delete-button">
-                Delete
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No tasks found. Add some to get started!</p>
-      )}
+    <div style={{ padding: "20px", fontFamily: "Arial" }}>
+      <h1>Task Dashboard</h1>
+
+      {/* Form to add new tasks */}
+      <form onSubmit={handleAddTask} style={{ marginBottom: "20px" }}>
+        <div>
+          <label>
+            Title:
+            <input
+              type="text"
+              value={taskTitle}
+              onChange={(e) => setTaskTitle(e.target.value)}
+              required
+              style={{ marginLeft: "10px", padding: "5px" }}
+            />
+          </label>
+        </div>
+
+        <div>
+          <label>
+            Description:
+            <input
+              type="text"
+              value={taskDescription}
+              onChange={(e) => setTaskDescription(e.target.value)}
+              required
+              style={{ marginLeft: "10px", padding: "5px" }}
+            />
+          </label>
+        </div>
+
+        <div>
+          <label>
+            Due Date:
+            <input
+              type="date"
+              value={taskDueDate}
+              onChange={(e) => setTaskDueDate(e.target.value)}
+              style={{ marginLeft: "10px", padding: "5px" }}
+            />
+          </label>
+        </div>
+
+        <div>
+          <label>
+            Status:
+            <select
+              value={taskStatus}
+              onChange={(e) => setTaskStatus(e.target.value)}
+              style={{ marginLeft: "10px", padding: "5px" }}
+            >
+              <option value="Pending">Pending</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </label>
+        </div>
+
+        <button type="submit" style={{ marginTop: "10px", padding: "10px 20px" }}>
+          {loading ? "Adding Task..." : "Add Task"}
+        </button>
+      </form>
+
+      {/* Display loading or error messages */}
+      {loading && <p>Adding task...</p>}
+      {error && <p>Error adding task: {error.message}</p>}
     </div>
   );
 };
 
 export default TaskDashboard;
+
 
