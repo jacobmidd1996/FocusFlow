@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@apollo/client";
 import { ADD_TASK, UPDATE_TASK, DELETE_TASK } from "../utils/mutations";
 import { GET_TASKS } from "../utils/queries";
@@ -12,31 +12,19 @@ type Task = {
 };
 
 type GetTasksQueryData = {
- tasks: Task[];
+  tasks: Task[];
 };
 
-/**
- * TaskDashboard Component
- * - Displays a task dashboard for managing tasks.
- * - Allows users to add, edit, delete, and view tasks.
- */
 const TaskDashboard: React.FC = () => {
-  // State to manage new task inputs
   const [taskTitle, setTaskTitle] = useState("");
   const [taskDescription, setTaskDescription] = useState("");
   const [taskDueDate, setTaskDueDate] = useState("");
-  const [taskStatus, setTaskStatus] = useState("Pending");
+  const [taskStatus, setTaskStatus] = useState("In Progress");
   const [editTaskId, setEditTaskId] = useState<number | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
 
-  /**
-   * Apollo Client query hook
-   * - Fetches the list of tasks from the server.
-   */
   const { loading: tasksLoading, error: tasksError, data: tasksData } = useQuery(GET_TASKS);
-  console.log(tasksData)
-  /**
-   * Apollo Client mutation hooks
-   */
+
   const [addTask, { loading: addingTask }] = useMutation(ADD_TASK, {
     refetchQueries: [{ query: GET_TASKS }],
   });
@@ -44,19 +32,14 @@ const TaskDashboard: React.FC = () => {
     refetchQueries: [{ query: GET_TASKS }],
   });
   const [deleteTask] = useMutation(DELETE_TASK, {
-    update(cache, { data: { removeTask} }) {
-      const existingData = cache.readQuery<GetTasksQueryData>({ query: GET_TASKS});
-
-      if (existingData?.tasks){
-        cache.writeQuery({
-          query: GET_TASKS,
-          data: {
-            tasks: existingData.tasks.filter((task) => task.id !== removeTask.taskId),
-          },
-        });
-      }
-    },
+    refetchQueries: [{ query: GET_TASKS }],
   });
+
+  useEffect(() => {
+    if (tasksData) {
+      setTasks(tasksData?.me.savedTask);
+    }
+  }, [tasksData]);
 
   /**
    * Handle form submission to add or edit a task
@@ -69,8 +52,8 @@ const TaskDashboard: React.FC = () => {
         // Update existing task
         await updateTask({
           variables: {
-            id: editTaskId,
-            task: {
+            taskId: editTaskId,
+            updates: {
               title: taskTitle,
               description: taskDescription,
               dueDate: taskDueDate,
@@ -108,7 +91,8 @@ const TaskDashboard: React.FC = () => {
    * - Populates the form with the task's details for editing.
    */
   const handleEditTask = (task: any) => {
-    setEditTaskId(task.id);
+    console.log("🚀 ~ handleEditTask ~ task:", task);
+    setEditTaskId(task._id);
     setTaskTitle(task.title);
     setTaskDescription(task.description);
     setTaskDueDate(task.dueDate);
@@ -120,29 +104,25 @@ const TaskDashboard: React.FC = () => {
    * - Removes the task from the list.
    */
   const handleDeleteTask = async (id: string) => {
-    console.log(id);
-   try {
-    await deleteTask({
-      variables: { taskId: id},
-      // update(cache, {data: { removeTask} }){
-      //   //existing tasks from cache
-      //   const existingData = cache.readQuery<GetTasksQueryData>({ query: GET_TASKS});
+    try {
+      await deleteTask({
+        variables: { taskId: id },
+        update(cache, { data: { removeTask } }) {
+          const existingData = cache.readQuery<GetTasksQueryData>({ query: GET_TASKS });
 
-      //   if (existingData?.tasks){
-      //     //filter deleted tasks
-      //     cache.writeQuery({
-      //       query: GET_TASKS,
-      //       data: {
-      //         tasks: existingData.tasks.filter((task: Task) => task.id !== removeTask.taskId),
-      //       },
-      //     });
-      //   }
-      // },
-    });
-
-   } catch (err){
-    console.error("Error deleting task:", err);
-   }
+          if (existingData?.tasks) {
+            cache.writeQuery({
+              query: GET_TASKS,
+              data: {
+                tasks: existingData.tasks.filter((task) => task.id !== removeTask.taskId),
+              },
+            });
+          }
+        },
+      });
+    } catch (err) {
+      console.error("Error deleting task:", err);
+    }
   };
 
   return (
@@ -183,6 +163,7 @@ const TaskDashboard: React.FC = () => {
             <input
               type="date"
               value={taskDueDate}
+              required
               onChange={(e) => setTaskDueDate(e.target.value)}
               style={{ marginLeft: "10px", padding: "5px" }}
             />
@@ -197,6 +178,7 @@ const TaskDashboard: React.FC = () => {
               onChange={(e) => setTaskStatus(e.target.value)}
               style={{ marginLeft: "10px", padding: "5px" }}
             >
+              <option value="In Progress">In Progress</option>
               <option value="Pending">Pending</option>
               <option value="Completed">Completed</option>
             </select>
@@ -208,23 +190,16 @@ const TaskDashboard: React.FC = () => {
         </button>
       </form>
 
-      {/* Display tasks */}
       {tasksLoading && <p>Loading tasks...</p>}
       {tasksError && <p>Error loading tasks: {tasksError.message}</p>}
       <ul>
-        {tasksData?.me.savedTask.map((task: any) => (
+        {tasks.map((task: any) => (
           <li key={task._id} style={{ marginBottom: "10px" }}>
             <strong>{task.title}</strong> - {task.description} - Due: {task.dueDate} - Status: {task.status}
-            <button
-              onClick={() => handleEditTask(task)}
-              style={{ marginLeft: "10px", padding: "5px" }}
-            >
+            <button onClick={() => handleEditTask(task)} style={{ marginLeft: "10px", padding: "5px" }}>
               Edit
             </button>
-            <button
-              onClick={() => handleDeleteTask(task._id)}
-              style={{ marginLeft: "10px", padding: "5px" }}
-            >
+            <button onClick={() => handleDeleteTask(task._id)} style={{ marginLeft: "10px", padding: "5px" }}>
               Delete
             </button>
           </li>
@@ -235,4 +210,3 @@ const TaskDashboard: React.FC = () => {
 };
 
 export default TaskDashboard;
-

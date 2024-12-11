@@ -6,7 +6,7 @@ import { LoginUserArgs, AddUserArgs, TaskDataArgs } from "../interfaces/Login.js
 const resolvers = {
   Query: {
     me: async (_parent: any, _args: any, context: any) => {
-      console.log("Context user:", context.user);
+      console.log("🚀 ~ context.user;:", context.user);
       const foundUser = await User.findOne({ _id: context.user._id });
       if (!foundUser) {
         throw new AuthenticationError("User not found");
@@ -28,26 +28,21 @@ const resolvers = {
       return { token, user };
     },
     addUser: async (_parent: any, args: AddUserArgs) => {
-      console.log("Add User Args:", args);
+      console.log("🚀 ~ addUser: ~ args:", args);
       const user = await User.create({ ...args });
       const token = signToken(user.username, user._id);
       return { token, user };
     },
     removeTask: async (_parent: any, { taskId }: { taskId: string }, context: any) => {
-      console.log(taskId)
-      console.log(context.user)
-      console.log("context")
       const foundUser = await User.findByIdAndUpdate(
         { _id: context.user._id },
         { $pull: { savedTask: { _id: taskId } } },
         { new: true }
       );
-      console.log("===")
-      console.log(foundUser)
       return foundUser;
     },
     savedTask: async (_parent: any, { task }: { task: TaskDataArgs }, context: any) => {
-      console.log("savedTask ===", task, context.user);
+      console.log("🚀 ~ savedTask: ~ task:", task);
       if (!context.user) {
         throw new AuthenticationError("Not authenticated");
       }
@@ -67,7 +62,6 @@ const resolvers = {
         throw new Error("User not found or failed to save task");
       }
 
-      console.log("New Task Saved:", newTask);
       return updatedUser;
     },
 
