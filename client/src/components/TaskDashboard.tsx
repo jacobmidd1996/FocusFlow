@@ -10,19 +10,19 @@ const TaskDashboard: React.FC = () => {
   const [taskStatus, setTaskStatus] = useState("Pending");
 
   // Apollo Client mutation hook
-  const [addTask, { loading, error }] = useMutation(ADD_TASK);
+  const [savedTask, { loading, error }] = useMutation(ADD_TASK);
 
   // Handle form submission to add a new task
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      console.log('addTask ===', taskTitle, taskDescription, taskDueDate, taskStatus)
-      const { data } = await addTask({
+      console.log("addTask ===", taskTitle, taskDescription, taskDueDate, taskStatus);
+      const { data } = await savedTask({
         variables: {
-          title: taskTitle,
-          description: taskDescription,
-          dueDate: taskDueDate,
-          status: taskStatus,
+          task: {
+            title: taskTitle,
+            description: taskDescription,
+          },
         },
       });
       console.log("Task added:", data);
@@ -108,5 +108,3 @@ const TaskDashboard: React.FC = () => {
 };
 
 export default TaskDashboard;
-
-

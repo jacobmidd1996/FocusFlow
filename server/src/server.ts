@@ -6,6 +6,7 @@ import path, { dirname } from "path";
 import { typeDefs, resolvers } from "./schema/index.js";
 import db from "./config/connection.js";
 import { fileURLToPath } from "url";
+import { authenticateToken } from "./utils/auth.js";
 
 const PORT = process.env.PORT || 3001;
 const app = express();
@@ -23,7 +24,9 @@ const startApolloServer = async () => {
 
   app.use(
     "/graphql",
-    expressMiddleware(server as any)
+    expressMiddleware(server as any, {
+      context: authenticateToken as any,
+    })
   );
 
   // if we're in production, serve client/dist as static assets

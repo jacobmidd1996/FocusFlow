@@ -1,12 +1,9 @@
 import { gql } from "@apollo/client";
 
 export const ADD_TASK = gql`
-  mutation AddTask($title: String!, $description: String!) {
-    addTask(title: $title, description: $description, status: $status) {
+  mutation SavedTask($task: TaskInput!) {
+    savedTask(task: $task) {
       _id
-      title
-      description
-      status
     }
   }
 `;
@@ -35,24 +32,24 @@ export const ADD_USER = gql`
   }
 `;
 
-export const DELETE_TASK =gql`
-mutation Mutation($taskId: String!) {
-  removeTask(taskId: $taskId) {
-    savedTask {
-      description
-      title
+export const DELETE_TASK = gql`
+  mutation Mutation($taskId: String!) {
+    removeTask(taskId: $taskId) {
+      savedTask {
+        description
+        title
+      }
     }
   }
-}
 `;
 
-export const UPDATE_TASK =gql`
-mutation UpdateTask($taskId: String!, $updates: TaskInput!) {
-  updateTask(taskId: $taskId, updates: $updates) {
-    savedTask {
-      _id
-      description
+export const UPDATE_TASK = gql`
+  mutation UpdateTask($taskId: String!, $updates: TaskInput!) {
+    updateTask(taskId: $taskId, updates: $updates) {
+      savedTask {
+        _id
+        description
+      }
     }
   }
-}
 `;
