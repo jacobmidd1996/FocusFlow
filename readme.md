@@ -25,6 +25,10 @@ We used a combination of React,Vite,Cypress,Typescript,Github actions, MongoDB a
 
 ## Screenshots
 
+<img src="assets/screenshot1.png" alt="screenshot1" width="120" height="100">
+
+<img src="assets/screenshot2.png" alt="screenshot1" width="120" height="100">
+
 ## Links
 
 Github repo: [Click to visit](https://github.com/jacobmidd1996/FocusFlow)
