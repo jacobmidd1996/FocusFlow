@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import LoginForm from "./components/LoginForm";
 import SignupForm from "./components/SignupForm";
 import TaskDashboard from "./components/TaskDashboard";
+import logo from '../../assets/logo.png';
 
 const App: React.FC = () => {
   const token = localStorage.getItem("token");
@@ -15,7 +16,9 @@ const App: React.FC = () => {
   if (!token) {
     return (
       <div className="container">
-        <h1>Welcome to FocusFlow</h1>
+        <img 
+        src={logo} alt="logo" className='logo' style={{ height: '100px', width: 'auto'}}/>
+        <h1 className="logo">Welcome to FocusFlow</h1>
         {isSigningUp ? <SignupForm /> : <LoginForm />}
         <button onClick={() => setIsSigningUp(!isSigningUp)}>
           {isSigningUp ? "Go to Login" : "Go to Signup"}
