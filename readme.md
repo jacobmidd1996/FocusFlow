@@ -14,6 +14,7 @@ We used a combination of React,Vite,Cypress,Typescript,Github actions, MongoDB a
 
 ## Table of Contents
 
+- [Links](#links)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Credits](#credits)
