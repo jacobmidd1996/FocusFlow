@@ -14,6 +14,7 @@ We used a combination of React,Vite,Cypress,Typescript,Github actions, MongoDB a
 
 ## Table of Contents
 
+- [screenshots](#Screenshots)
 - [Links](#links)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -21,6 +22,8 @@ We used a combination of React,Vite,Cypress,Typescript,Github actions, MongoDB a
 - [License](#license)
 - [tests](#tests)
 - [contact](#contact)
+
+## Screenshots
 
 ## Links
 
