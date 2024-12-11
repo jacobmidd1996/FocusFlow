@@ -34,11 +34,16 @@ const resolvers = {
       return { token, user };
     },
     removeTask: async (_parent: any, { taskId }: { taskId: string }, context: any) => {
+      console.log(taskId)
+      console.log(context.user)
+      console.log("context")
       const foundUser = await User.findByIdAndUpdate(
         { _id: context.user._id },
         { $pull: { savedTask: { _id: taskId } } },
         { new: true }
       );
+      console.log("===")
+      console.log(foundUser)
       return foundUser;
     },
     savedTask: async (_parent: any, { task }: { task: TaskDataArgs }, context: any) => {

@@ -33,11 +33,13 @@ export const ADD_USER = gql`
 `;
 
 export const DELETE_TASK = gql`
-  mutation Mutation($taskId: String!) {
+  mutation removeTask($taskId: String!) {
     removeTask(taskId: $taskId) {
       savedTask {
+        _id
         description
         title
+        
       }
     }
   }
