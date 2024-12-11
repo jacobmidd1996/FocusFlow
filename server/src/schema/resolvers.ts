@@ -1,22 +1,16 @@
 import { User } from "../models/index.js";
 import { signToken, AuthenticationError } from "../services/auth.js";
-import {
-  LoginUserArgs,
-  AddUserArgs,
-  TaskDataArgs,
-} from "../interfaces/Login.js";
+import { LoginUserArgs, AddUserArgs, TaskDataArgs } from "../interfaces/Login.js";
+// import { v4 as uuidv4 } from "uuid";
 
 const resolvers = {
   Query: {
     me: async (_parent: any, _args: any, context: any) => {
-      console.log(context.user)
-      console.log(context.params)
-      const foundUser = await User.findOne({
-        $or: [
-          { _id: context.user ? context.user._id : context.params.id },
-          { username: context.params.username },
-        ],
-      });
+      console.log("Context user:", context.user);
+      const foundUser = await User.findOne({ _id: context.user._id });
+      if (!foundUser) {
+        throw new AuthenticationError("User not found");
+      }
       return foundUser;
     },
   },
@@ -34,16 +28,12 @@ const resolvers = {
       return { token, user };
     },
     addUser: async (_parent: any, args: AddUserArgs) => {
-      console.log(args)
+      console.log("Add User Args:", args);
       const user = await User.create({ ...args });
       const token = signToken(user.username, user._id);
       return { token, user };
     },
-    removeTask: async (
-      _parent: any,
-      { taskId }: { taskId: string },
-      context: any
-    ) => {
+    removeTask: async (_parent: any, { taskId }: { taskId: string }, context: any) => {
       const foundUser = await User.findByIdAndUpdate(
         { _id: context.user._id },
         { $pull: { savedTask: { _id: taskId } } },
@@ -51,30 +41,34 @@ const resolvers = {
       );
       return foundUser;
     },
-    savedTask: async (
-      _parent: any,
-      { task }: { task: TaskDataArgs },
-      context: any
-    ) => {
+    savedTask: async (_parent: any, { task }: { task: TaskDataArgs }, context: any) => {
+      console.log('savedTask ===')
+      if (!context.user) {
+        throw new AuthenticationError("Not authenticated");
+      }
+    
       const newTask = {
+        
         ...task,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        dueDate: task.dueDate || null,
+       
       };
-
-      const foundUser = await User.findByIdAndUpdate(
+    
+      const updatedUser = await User.findByIdAndUpdate(
         { _id: context.user._id },
         { $push: { savedTask: newTask } },
         { new: true }
       );
-      return foundUser;
+    
+      if (!updatedUser) {
+        console.error("Failed to update user:", updatedUser);
+        throw new Error("User not found or failed to save task");
+      }
+    
+      console.log("New Task Saved:", newTask);
+      return updatedUser;
     },
-    updateTask: async (
-      _parent: any,
-      { taskId, updates }: { taskId: string; updates: Partial<TaskDataArgs> },
-      context: any
-    ) => {
+    
+    updateTask: async (_parent: any, { taskId, updates }: { taskId: string; updates: Partial<TaskDataArgs> }, context: any) => {
       const updatedTask = {
         ...updates,
         updatedAt: new Date().toISOString(),
@@ -96,5 +90,6 @@ const resolvers = {
 };
 
 export default resolvers;
+
 
 

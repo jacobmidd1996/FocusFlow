@@ -1,29 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { useMutation, gql } from "@apollo/client";
-
-// GraphQL Mutation to save a new task
-const SAVE_TASK_MUTATION = gql`
-  mutation SaveTask($task: TaskInput!) {
-    savedTask(task: $task) {
-      _id
-      title
-      description
-      dueDate
-    }
-  }
-`;
-
-// GraphQL Mutation to update an existing task
-const UPDATE_TASK_MUTATION = gql`
-  mutation UpdateTask($taskId: String!, $updates: TaskInput!) {
-    updateTask(taskId: $taskId, updates: $updates) {
-      _id
-      title
-      description
-      dueDate
-    }
-  }
-`;
+import React, { useState } from "react";
+import { useMutation,} from "@apollo/client";
+// import {GET_TASKS } from "../utils/queries.js"
+import { ADD_TASK, UPDATE_TASK } from "../utils/mutations.js";
 
 interface TaskFormProps {
   task?: {
@@ -32,59 +10,60 @@ interface TaskFormProps {
     description: string;
     dueDate: string;
   };
-  onComplete: () => void; // Callback when the form is submitted
+  onComplete: (task: { title: string; description: string; dueDate: string }) => void;
 }
 
-const TaskForm: React.FC<TaskFormProps> = ({ task, onComplete }) => {
+
+const TaskForm: React.FC<TaskFormProps> = ({ task, onComplete}) => {
   const [title, setTitle] = useState(task?.title || "");
   const [description, setDescription] = useState(task?.description || "");
   const [dueDate, setDueDate] = useState(task?.dueDate || "");
-  const [saveTask] = useMutation(SAVE_TASK_MUTATION);
-  const [updateTask] = useMutation(UPDATE_TASK_MUTATION);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [saveTask] = useMutation(ADD_TASK);
+  const [updateTask] = useMutation(UPDATE_TASK);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    setError(null);
+    setLoading(true);
+    let user;
+    
     try {
       if (task) {
-        // Update an existing task
-        await updateTask({
+        user = await updateTask({
           variables: {
             taskId: task._id,
             updates: { title, description, dueDate },
           },
         });
       } else {
-        // Save a new task
-        await saveTask({
+        user = await saveTask({
           variables: {
-            task: { title, description, dueDate },
+            title: title,
+            description: description,
+            dueDate: dueDate,
+            status: "not started"
           },
         });
       }
 
       alert("Task saved successfully!");
-      onComplete();
+      setLoading(false);
+      alert(JSON.stringify(task))
+      alert(JSON.stringify(user))
+      // onComplete(saveTask);
     } catch (err) {
       console.error("Error saving task:", err);
-      alert("Failed to save task. Please try again.");
+      setError("Failed to save task. Please try again.");
+      setLoading(false);
     }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      style={{
-        maxWidth: "400px",
-        margin: "0 auto",
-        textAlign: "center",
-        padding: "20px",
-        border: "1px solid #ddd",
-        borderRadius: "5px",
-      }}
-    >
+    <form className="container" onSubmit={handleSubmit}>
       <h2>{task ? "Edit Task" : "New Task"}</h2>
-      <div style={{ marginBottom: "10px" }}>
+      <div>
         <label htmlFor="title">Title</label>
         <input
           type="text"
@@ -92,19 +71,17 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onComplete }) => {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
-          style={{ display: "block", width: "100%", padding: "8px" }}
         />
       </div>
-      <div style={{ marginBottom: "10px" }}>
+      <div>
         <label htmlFor="description">Description</label>
         <textarea
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          style={{ display: "block", width: "100%", padding: "8px" }}
         ></textarea>
       </div>
-      <div style={{ marginBottom: "10px" }}>
+      <div>
         <label htmlFor="dueDate">Due Date</label>
         <input
           type="date"
@@ -112,24 +89,15 @@ const TaskForm: React.FC<TaskFormProps> = ({ task, onComplete }) => {
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
           required
-          style={{ display: "block", width: "100%", padding: "8px" }}
         />
       </div>
-      <button
-        type="submit"
-        style={{
-          padding: "10px 20px",
-          backgroundColor: "#007BFF",
-          color: "#fff",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-        }}
-      >
-        {task ? "Update Task" : "Create Task"}
+      <button type="submit" disabled={loading}>
+        {loading ? "Saving..." : task ? "Update Task" : "Create Task"}
       </button>
+      {error && <p style={{ color: "red" }}>{error}</p>}
     </form>
   );
 };
 
 export default TaskForm;
+

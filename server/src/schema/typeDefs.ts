@@ -21,16 +21,19 @@ const typeDefs = `
     updatedAt: String
   }
 
-  # Define the Category type
-  type Category {
-    _id: String
-    name: String
-  }
-
   # Define the Auth type for authentication
   type Auth {
     token: ID!
     user: User!
+  }
+
+  # Input type for creating or updating a task
+  input TaskInput {
+    _id: String # Optional, for updates or client-side management
+    title: String!
+    description: String
+    dueDate: String
+    status: String
   }
 
   # Queries
@@ -38,26 +41,19 @@ const typeDefs = `
     me: User
   }
 
-  # Input type for creating or updating a task
-  input TaskInput {
-    title: String
-    description: String
-    dueDate: String
-    status: String
-  }
-
   # Mutations
   type Mutation {
     login(username: String!, password: String!): Auth
     addUser(username: String!, password: String!): Auth
     savedTask(task: TaskInput!): User # Mutation to save a new task
-    addTask(title: String!, description: String, dueDate: String): Task
-    updateTask(taskId: String!, title: String, description: String, dueDate: String): Task
-    removeTask(taskId: String!): Boolean
+    updateTask(taskId: String!, updates: TaskInput!): User # Mutation to update a task
+    removeTask(taskId: String!): User # Mutation to remove a task
   }
 `;
 
 export default typeDefs;
+
+
 
 
 

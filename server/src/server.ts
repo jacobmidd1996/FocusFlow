@@ -2,7 +2,7 @@ import express from "express";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import path, { dirname } from "path";
-import { authenticateToken } from "./utils/auth.js";
+// import { authenticateToken } from "./utils/auth.js";
 import { typeDefs, resolvers } from "./schema/index.js";
 import db from "./config/connection.js";
 import { fileURLToPath } from "url";
@@ -23,9 +23,7 @@ const startApolloServer = async () => {
 
   app.use(
     "/graphql",
-    expressMiddleware(server as any, {
-      context: authenticateToken as any,
-    })
+    expressMiddleware(server as any)
   );
 
   // if we're in production, serve client/dist as static assets

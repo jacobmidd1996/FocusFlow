@@ -16,6 +16,7 @@ const TaskDashboard: React.FC = () => {
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      console.log('addTask ===', taskTitle, taskDescription, taskDueDate, taskStatus)
       const { data } = await addTask({
         variables: {
           title: taskTitle,
